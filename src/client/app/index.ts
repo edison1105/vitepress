@@ -1,12 +1,13 @@
 import RawTheme from '@theme/index'
 import {
   createApp as createClientApp,
-  createSSRApp,
-  defineComponent,
+  createVaporSSRApp as createSSRApp,
+  defineComponent as defineComponent,
   h,
   onMounted,
   watchEffect,
-  type App
+  type App,
+  vaporInteropPlugin
 } from 'vue'
 import { ClientOnly } from './components/ClientOnly'
 import { Content } from './components/Content'
@@ -112,9 +113,13 @@ export async function createApp() {
 }
 
 function newApp(): App {
-  return import.meta.env.PROD
-    ? createSSRApp(VitePressApp)
-    : createClientApp(VitePressApp)
+  if(import.meta.env.PROD) {
+    return createSSRApp(VitePressApp)
+  } else {
+    const app = createClientApp(VitePressApp as any)
+    app.use(vaporInteropPlugin)
+    return app
+  } 
 }
 
 function newRouter(): Router {
