@@ -1,4 +1,4 @@
-<template>
+<template vapor>
   <div class="VPPage">
     <slot name="page-top" />
     <Content />

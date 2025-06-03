@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup lang="ts" >
 import type { DefaultTheme } from 'vitepress/theme'
 import { computed } from 'vue'
 import { useSidebarItemControl } from '../composables/sidebar'

@@ -1,4 +1,4 @@
-<template>
+<template vapor>
   <div class="VPTeamPage">
     <slot />
   </div>
