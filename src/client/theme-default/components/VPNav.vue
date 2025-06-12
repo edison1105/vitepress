@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup lang="ts" vapor>
 import { inBrowser } from 'vitepress'
 import { computed, provide, watchEffect } from 'vue'
 import { useData } from '../composables/data'

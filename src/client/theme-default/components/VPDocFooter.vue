@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup lang="ts" vapor>
 import { computed } from 'vue'
 import { useData } from '../composables/data'
 import { useEditLink } from '../composables/edit-link'

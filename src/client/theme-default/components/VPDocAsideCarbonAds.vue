@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup lang="ts" vapor>
 import { defineAsyncComponent } from 'vue'
 import type { DefaultTheme } from 'vitepress/theme'
 

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup lang="ts" vapor>
 import { ref } from 'vue'
 import { useData } from '../composables/data'
 import { resolveTitle, useActiveAnchor } from '../composables/outline'

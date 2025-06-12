@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup lang="ts" vapor>
 import { ref, computed, watchEffect, onMounted } from 'vue'
 import { useData } from '../composables/data'
 

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup lang="ts" vapor>
 import { useRoute } from 'vitepress'
 import { computed } from 'vue'
 import { useData } from '../composables/data'
