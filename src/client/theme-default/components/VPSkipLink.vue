@@ -1,4 +1,4 @@
-<script lang="ts" setup>
+<script lang="ts" setup vapor>
 import { ref, watch } from 'vue'
 import { useRoute } from 'vitepress'
 import { useData } from '../composables/data'
