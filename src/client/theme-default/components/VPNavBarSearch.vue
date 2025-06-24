@@ -1,4 +1,4 @@
-<script lang="ts" setup>
+<script lang="ts" setup vapor>
 import '@docsearch/css'
 import { onKeyStroke } from '@vueuse/core'
 import type { DefaultTheme } from 'vitepress/theme'
@@ -146,7 +146,7 @@ const provider = __ALGOLIA__ ? 'algolia' : __VP_LOCAL_SEARCH__ ? 'local' : ''
       <VPAlgoliaSearchBox
         v-if="loaded"
         :algolia="theme.search?.options ?? theme.algolia"
-        @vue:beforeMount="actuallyLoaded = true"
+        @beforeMount="actuallyLoaded = true"
       />
 
       <div v-if="!actuallyLoaded" id="docsearch">

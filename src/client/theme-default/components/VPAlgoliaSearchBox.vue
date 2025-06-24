@@ -2,18 +2,24 @@
 import docsearch from '@docsearch/js'
 import { useRouter } from 'vitepress'
 import type { DefaultTheme } from 'vitepress/theme'
-import { nextTick, onMounted, watch } from 'vue'
+import { nextTick, onBeforeMount, onMounted, watch } from 'vue'
 import { useData } from '../composables/data'
 
 const props = defineProps<{
   algolia: DefaultTheme.AlgoliaSearchOptions
 }>()
 
+const emit = defineEmits<{
+  (e: 'beforeMount'): void
+}>()
+
 const router = useRouter()
 const { site, localeIndex, lang } = useData()
 
 type DocSearchProps = Parameters<typeof docsearch>[0]
-
+onBeforeMount(()=>{
+  emit('beforeMount')
+})
 onMounted(update)
 watch(localeIndex, update)
 
