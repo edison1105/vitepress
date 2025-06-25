@@ -271,7 +271,7 @@ async function minifyScript(code: string, filename: string): Promise<string> {
     return oxcMinify.minify(filename, code).code.trim()
   }
   return (
-    await transformWithEsbuild(code, filename, { minify: true })
+    await transformWithEsbuild(code, filename, { minify: false })
   ).code.trim()
 }
 

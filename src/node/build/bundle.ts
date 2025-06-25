@@ -89,7 +89,7 @@ export async function bundle(
       ssr,
       ssrEmitAssets: config.mpa,
       // minify with esbuild in MPA mode (for CSS)
-      minify: ssr ? !!config.mpa : (options.minify ?? !process.env.DEBUG),
+      minify: false,
       outDir: ssr ? config.tempDir : config.outDir,
       cssCodeSplit: false,
       rollupOptions: {

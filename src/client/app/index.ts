@@ -1,7 +1,7 @@
 import RawTheme from '@theme/index'
 import {
   createApp as createClientApp,
-  createVaporSSRApp as createSSRApp,
+  createSSRApp as createSSRApp,
   defineComponent as defineComponent,
   h,
   onMounted,
@@ -113,13 +113,13 @@ export async function createApp() {
 }
 
 function newApp(): App {
-  if(import.meta.env.PROD) {
-    return createSSRApp(VitePressApp)
-  } else {
-    const app = createClientApp(VitePressApp as any)
+  const app = import.meta.env.PROD
+    ? createSSRApp(VitePressApp)
+    : createClientApp(VitePressApp as any)
+  if (!import.meta.env.SSR) {
     app.use(vaporInteropPlugin)
-    return app
-  } 
+  }
+  return app
 }
 
 function newRouter(): Router {
