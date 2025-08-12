@@ -3,7 +3,7 @@ defineProps<{
   active: boolean
 }>()
 
-defineEmits<{
+const $emit = defineEmits<{
   (e: 'click'): void
 }>()
 </script>

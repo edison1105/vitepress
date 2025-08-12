@@ -9,7 +9,7 @@ defineProps<{
   open: boolean
 }>()
 
-defineEmits<{
+const $emit = defineEmits<{
   (e: 'open-menu'): void
 }>()
 

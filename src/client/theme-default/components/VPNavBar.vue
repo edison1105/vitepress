@@ -15,7 +15,7 @@ const props = defineProps<{
   isScreenOpen: boolean
 }>()
 
-defineEmits<{
+const $emit = defineEmits<{
   (e: 'toggle-screen'): void
 }>()
 

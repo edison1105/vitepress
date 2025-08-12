@@ -423,7 +423,7 @@ function onMouseMove(e: MouseEvent) {
       aria-labelledby="localsearch-label"
       class="VPLocalSearchBox"
     >
-      <div class="backdrop" @click="$emit('close')" />
+      <div class="backdrop" @click="emit('close')" />
 
       <div class="shell">
         <form
@@ -442,7 +442,7 @@ function onMouseMove(e: MouseEvent) {
             <button
               class="back-button"
               :title="translate('modal.backButtonTitle')"
-              @click="$emit('close')"
+              @click="emit('close')"
             >
               <span class="vpi-arrow-left local-search-icon" />
             </button>
@@ -515,7 +515,7 @@ function onMouseMove(e: MouseEvent) {
               :aria-label="[...p.titles, p.title].join(' > ')"
               @mouseenter="!disableMouseOver && (selectedIndex = index)"
               @focusin="selectedIndex = index"
-              @click="$emit('close')"
+              @click="emit('close')"
               :data-index="index"
             >
               <div>
