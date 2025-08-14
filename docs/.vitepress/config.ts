@@ -132,6 +132,15 @@ export default defineConfig({
     ]
   },
 
+  vue: {
+    features:{
+      prodHydrationMismatchDetails: true
+    },
+    script: {
+      vapor: true // enable vapor mode
+    }
+  },
+
   transformPageData: prod
     ? (pageData, ctx) => {
         const site = resolveSiteDataByRoute(
