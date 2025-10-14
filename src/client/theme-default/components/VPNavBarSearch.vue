@@ -3,7 +3,7 @@ import '@docsearch/css'
 import { onKeyStroke } from '@vueuse/core'
 import type { DefaultTheme } from 'vitepress/theme'
 import {
-  defineAsyncComponent,
+  defineVaporAsyncComponent,
   onMounted,
   onUnmounted,
   ref
@@ -12,11 +12,11 @@ import { useData } from '../composables/data'
 import VPNavBarSearchButton from './VPNavBarSearchButton.vue'
 
 const VPLocalSearchBox = __VP_LOCAL_SEARCH__
-  ? defineAsyncComponent(() => import('./VPLocalSearchBox.vue'))
+  ? defineVaporAsyncComponent(() => import('./VPLocalSearchBox.vue') as any)
   : () => null
 
 const VPAlgoliaSearchBox = __ALGOLIA__
-  ? defineAsyncComponent(() => import('./VPAlgoliaSearchBox.vue'))
+  ? defineVaporAsyncComponent(() => import('./VPAlgoliaSearchBox.vue') as any)
   : () => null
 
 const { theme } = useData()
