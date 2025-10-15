@@ -133,11 +133,15 @@ export default defineConfig({
   },
 
   vue: {
-    features:{
+    features: {
       prodHydrationMismatchDetails: true
     },
     script: {
       vapor: true // enable vapor mode
+    },
+    // TODO: vapor mode has bugs with transformAssetUrls enabled
+    template: {
+      transformAssetUrls: false
     }
   },
 

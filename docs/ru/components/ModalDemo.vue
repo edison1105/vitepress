@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup lang="ts" vapor>
 import { ref } from 'vue'
 const showModal = ref(false)
 </script>

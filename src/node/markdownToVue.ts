@@ -254,6 +254,7 @@ export async function createMarkdownToVueRenderFn(
     }
 
     const vueSrc = [
+      ...(siteConfig.vue?.script?.vapor ? ['<script vapor></script>'] : []),
       ...injectPageDataCode(
         sfcBlocks?.scripts.map((item) => item.content) ?? [],
         pageData
