@@ -242,7 +242,7 @@ VitePress 目前只有使用 teleport 传送到 body 的 SSG 支持。对于其�
 </ClientOnly>
 ```
 
-<script setup>
+<script setup vapor>
 import ModalDemo from '../../components/ModalDemo.vue'
 import ComponentInHeader from '../../components/ComponentInHeader.vue'
 </script>

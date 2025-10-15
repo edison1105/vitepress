@@ -101,7 +101,7 @@
     "@shikijs/core": "^3.4.0",
     "@shikijs/transformers": "^3.4.0",
     "@shikijs/types": "^3.4.0",
-    "@vitejs/plugin-vue": "^5.2.4",
+    "@vitejs/plugin-vue": "^6.0.1",
     "@vue/devtools-api": "^7.7.6",
     "@vue/shared": "^3.5.13",
     "@vueuse/core": "^13.1.0",
@@ -111,7 +111,7 @@
     "minisearch": "^7.1.2",
     "shiki": "^3.4.0",
     "vite": "^6.3.5",
-    "vue": "https://pkg.pr.new/vue@fb920ac"
+    "vue": "https://pkg.pr.new/vue@b0b5b7b"
   },
   "devDependencies": {
     "@clack/prompts": "^1.0.0-alpha.0",

@@ -1,4 +1,4 @@
-<script setup>
+<script setup vapor>
 import { VPTeamMembers } from 'vitepress/theme'
 
 const members = [

@@ -241,7 +241,7 @@ VitePress atualmente oferece suporte a SSG para _teleports_ apenas para o corpo.
 </ClientOnly>
 ```
 
-<script setup>
+<script setup vapor>
 import ModalDemo from '../../components/ModalDemo.vue'
 import ComponentInHeader from '../../components/ComponentInHeader.vue'
 </script>

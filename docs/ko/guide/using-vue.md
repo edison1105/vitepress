@@ -242,7 +242,7 @@ VitePress는 현재 body로 텔레포트를 사용하는 SSG만 지원합니다.
 </ClientOnly>
 ```
 
-<script setup>
+<script setup vapor>
 import ModalDemo from '../../components/ModalDemo.vue'
 import ComponentInHeader from '../../components/ComponentInHeader.vue'
 </script>

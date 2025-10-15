@@ -254,10 +254,10 @@ export async function createMarkdownToVueRenderFn(
     }
 
     const vueSrc = [
-      ...(siteConfig.vue?.script?.vapor ? ['<script vapor></script>'] : []),
       ...injectPageDataCode(
         sfcBlocks?.scripts.map((item) => item.content) ?? [],
-        pageData
+        pageData,
+        siteConfig.vue?.script?.vapor
       ),
       `<template><div>${html}</div></template>`,
       ...(sfcBlocks?.styles.map((item) => item.content) ?? []),
@@ -286,7 +286,7 @@ const scriptClientRE = /<\s*script[^>]*\bclient\b[^>]*/
 const defaultExportRE = /((?:^|\n|;)\s*)export(\s*)default/
 const namedDefaultExportRE = /((?:^|\n|;)\s*)export(.+)as(\s*)default/
 
-function injectPageDataCode(tags: string[], data: PageData) {
+function injectPageDataCode(tags: string[], data: PageData, vapor?: boolean) {
   const code = `\nexport const __pageData = JSON.parse(${JSON.stringify(
     JSON.stringify(data)
   )})`
@@ -301,6 +301,7 @@ function injectPageDataCode(tags: string[], data: PageData) {
 
   const isUsingTS = tags.findIndex((tag) => scriptLangTsRE.test(tag)) > -1
 
+  const vaporFlag = vapor ? ',vapor:true' : ''
   if (existingScriptIndex > -1) {
     const tagSrc = tags[existingScriptIndex]
     // user has <script> tag inside markdown
@@ -312,7 +313,7 @@ function injectPageDataCode(tags: string[], data: PageData) {
       code +
         (hasDefaultExport
           ? ``
-          : `\nexport default {name:${JSON.stringify(data.relativePath)}}`) +
+          : `\nexport default {name:${JSON.stringify(data.relativePath)}${vaporFlag}}`) +
         `</script>`
     )
   } else {
@@ -321,7 +322,7 @@ function injectPageDataCode(tags: string[], data: PageData) {
         isUsingTS ? 'lang="ts"' : ''
       }>${code}\nexport default {name:${JSON.stringify(
         data.relativePath
-      )}}</script>`
+      )}${vaporFlag}}</script>`
     )
   }
 

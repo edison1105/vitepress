@@ -243,7 +243,7 @@ npm install -D stylus
 </ClientOnly>
 ```
 
-<script setup>
+<script setup vapor>
 import ModalDemo from '../../components/ModalDemo.vue'
 import ComponentInHeader from '../../components/ComponentInHeader.vue'
 </script>

@@ -6,7 +6,6 @@ import {
   defineComponent,
   defineVaporComponent,
   h,
-  insert,
   onMounted,
   onUnmounted,
   onUpdated,
@@ -65,20 +64,16 @@ export const Content = import.meta.env.SSR
             onUnmounted(runCbs)
             return createIf(
               () => route.component,
-              () => {
-                ;(route.component as any).__vapor = true
-                return createComponent(route.component! as any)
-              },
+              () => createComponent(route.component! as any),
               () => template('404 Page Not Found')()
             )
           }
         })
 
-        const frag = createKeyedFragment(
+        createKeyedFragment(
           () => route.path,
           () => createComponent(Wrapper)
         )
-        insert(frag, container)
 
         renderEffect(() => {
           setDynamicProps(container, [
