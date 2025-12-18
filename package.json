@@ -111,7 +111,7 @@
     "minisearch": "^7.1.2",
     "shiki": "^3.4.0",
     "vite": "^6.3.5",
-    "vue": "https://pkg.pr.new/vue@8afb3b0"
+    "vue": "https://pkg.pr.new/vue@ad0a237"
   },
   "devDependencies": {
     "@clack/prompts": "^1.0.0-alpha.0",
@@ -207,7 +207,7 @@
       "optional": true
     }
   },
-  "packageManager": "pnpm@10.10.0",
+  "packageManager": "pnpm@10.25.0",
   "pnpm": {
     "peerDependencyRules": {
       "ignoreMissing": [
