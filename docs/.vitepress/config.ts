@@ -138,11 +138,6 @@ export default defineConfig({
     },
     script: {
       vapor: true // enable vapor mode
-    },
-    // vapor mode has bugs with transformAssetUrls enabled
-    // has PR https://github.com/vuejs/core/pull/13630
-    template: {
-      transformAssetUrls: false
     }
   },
 
