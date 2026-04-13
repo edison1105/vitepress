@@ -1,4 +1,8 @@
-<script setup vapor>
+---
+description: Create team pages with member profiles using VitePress built-in team components.
+---
+
+<script setup>
 import { VPTeamMembers } from 'vitepress/theme'
 
 const members = [

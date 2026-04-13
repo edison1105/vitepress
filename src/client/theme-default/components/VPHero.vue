@@ -1,6 +1,7 @@
-<script setup lang="ts" vapor>
-import { type Ref, inject } from 'vue'
+<script setup lang="ts">
 import type { DefaultTheme } from 'vitepress/theme'
+import { computed, inject } from 'vue'
+import { layoutInfoInjectionKey } from '../composables/layout'
 import VPButton from './VPButton.vue'
 import VPImage from './VPImage.vue'
 
@@ -20,7 +21,10 @@ defineProps<{
   actions?: HeroAction[]
 }>()
 
-const heroImageSlotExists = inject('hero-image-slot-exists') as Ref<boolean>
+const { heroImageSlotExists } = inject(
+  layoutInfoInjectionKey,
+  { heroImageSlotExists: computed(() => false) }
+)
 </script>
 
 <template>
@@ -38,6 +42,7 @@ const heroImageSlotExists = inject('hero-image-slot-exists') as Ref<boolean>
         <slot name="home-hero-info-after" />
 
         <div v-if="actions" class="actions">
+          <slot name="home-hero-actions-before-actions" />
           <div v-for="action in actions" :key="action.link" class="action">
             <VPButton
               tag="a"
@@ -139,6 +144,11 @@ const heroImageSlotExists = inject('hero-image-slot-exists') as Ref<boolean>
   font-size: 32px;
   font-weight: 700;
   white-space: pre-wrap;
+
+  &:lang(ja) {
+    font-feature-settings: 'palt';
+    word-break: auto-phrase;
+  }
 }
 
 .VPHero.has-image .name,

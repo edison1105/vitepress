@@ -11,6 +11,20 @@ import {
 import llmstxt from 'vitepress-plugin-llms'
 
 const prod = !!process.env.NETLIFY
+const siteUrl = 'https://vitepress.dev'
+
+const ogImage = new URL('/vitepress-og.jpg', siteUrl).href
+
+const localeToOgLocaleMap: Record<string, string> = {
+  root: 'en_US',
+  zh: 'zh_CN',
+  pt: 'pt_BR',
+  ru: 'ru_RU',
+  es: 'es_ES',
+  ko: 'ko_KR',
+  fa: 'fa_IR',
+  ja: 'ja_JP'
+}
 
 export default defineConfig({
   title: 'VitePress',
@@ -26,10 +40,13 @@ export default defineConfig({
   markdown: {
     math: true,
     codeTransformers: [
-      // We use `[!!code` in demo to prevent transformation, here we revert it back.
+      // We use `[!!code` and `@@include` in demo to prevent transformation,
+      // here we revert it back.
       {
         postprocess(code) {
-          return code.replace(/\[\!\!code/g, '[!code')
+          return code
+            .replaceAll('[!!code', '[!code')
+            .replaceAll('@@include', '@include')
         }
       }
     ],
@@ -52,6 +69,8 @@ export default defineConfig({
               return 'Скопировать код'
             case 'zh':
               return '复制代码'
+            case 'ja':
+              return 'コードをコピー'
             default:
               return 'Copy code'
           }
@@ -66,21 +85,17 @@ export default defineConfig({
   },
 
   sitemap: {
-    hostname: 'https://vitepress.dev',
+    hostname: siteUrl,
     transformItems(items) {
       return items.filter((item) => !item.url.includes('migration'))
     }
   },
 
-  /* prettier-ignore */
+  // prettier-ignore
   head: [
     ['link', { rel: 'icon', type: 'image/svg+xml', href: '/vitepress-logo-mini.svg' }],
     ['link', { rel: 'icon', type: 'image/png', href: '/vitepress-logo-mini.png' }],
     ['meta', { name: 'theme-color', content: '#5f67ee' }],
-    ['meta', { property: 'og:type', content: 'website' }],
-    ['meta', { property: 'og:site_name', content: 'VitePress' }],
-    ['meta', { property: 'og:image', content: 'https://vitepress.dev/vitepress-og.jpg' }],
-    ['meta', { property: 'og:url', content: 'https://vitepress.dev/' }],
     ['script', { src: 'https://cdn.usefathom.com/script.js', 'data-site': 'AZBRSFGG', 'data-spa': 'auto', defer: '' }]
   ],
 
@@ -96,7 +111,11 @@ export default defineConfig({
       options: {
         appId: '8J64VVRP8K',
         apiKey: '52f578a92b88ad6abde815aae2b0ad7c',
-        indexName: 'vitepress'
+        indexName: 'vitepress',
+        askAi: {
+          assistantId: 'YaVSonfX5bS8',
+          sidePanel: true
+        }
       }
     },
 
@@ -104,13 +123,14 @@ export default defineConfig({
   },
 
   locales: {
-    root: { label: 'English' },
-    zh: { label: '简体中文' },
-    pt: { label: 'Português' },
-    ru: { label: 'Русский' },
-    es: { label: 'Español' },
-    ko: { label: '한국어' },
-    fa: { label: 'فارسی' }
+    root: { label: 'English', lang: 'en-US', dir: 'ltr' },
+    zh: { label: '简体中文', lang: 'zh-Hans', dir: 'ltr' },
+    pt: { label: 'Português', lang: 'pt-BR', dir: 'ltr' },
+    ru: { label: 'Русский', lang: 'ru-RU', dir: 'ltr' },
+    es: { label: 'Español', lang: 'es', dir: 'ltr' },
+    ko: { label: '한국어', lang: 'ko-KR', dir: 'ltr' },
+    fa: { label: 'فارسی', lang: 'fa-IR', dir: 'rtl' },
+    ja: { label: '日本語', lang: 'ja', dir: 'ltr' }
   },
 
   vite: {
@@ -124,34 +144,44 @@ export default defineConfig({
           firebase: 'logos:firebase'
         }
       }),
-      prod &&
-        llmstxt({
-          workDir: 'en',
-          ignoreFiles: ['index.md']
-        })
-    ]
+      prod && llmstxt({ workDir: 'en', ignoreFiles: ['index.md'] })
+    ],
+    experimental: {
+      enableNativePlugin: true
+    }
   },
 
   vue: {
-    features: {
-      prodHydrationMismatchDetails: true
-    },
+    // features: {
+    //   prodHydrationMismatchDetails: true
+    // },
     script: {
       vapor: true // enable vapor mode
     }
   },
 
-  transformPageData: prod
-    ? (pageData, ctx) => {
-        const site = resolveSiteDataByRoute(
-          ctx.siteConfig.site,
-          pageData.relativePath
-        )
-        const title = `${pageData.title || site.title} | ${pageData.description || site.description}`
-        ;((pageData.frontmatter.head ??= []) as HeadConfig[]).push(
-          ['meta', { property: 'og:locale', content: site.lang }],
-          ['meta', { property: 'og:title', content: title }]
-        )
-      }
-    : undefined
+  // prettier-ignore
+  transformPageData: prod ? (pageData, ctx) => {
+    const url = new URL(pageData.relativePath.replace(/(?:(^|\/)index)?\.md$/, '$1'), siteUrl).href
+    const site = resolveSiteDataByRoute(ctx.siteConfig.site, pageData.relativePath)
+    const title = pageData.title ? `${pageData.title} | VitePress` : site.title
+    const description = pageData.description || site.description
+    const locale = localeToOgLocaleMap[site.localeIndex || 'root']
+
+    ;((pageData.frontmatter.head ??= []) as HeadConfig[]).push(
+      ['meta', { property: 'og:url', content: url }],
+      ['meta', { property: 'og:title', content: title }],
+      ['meta', { property: 'og:description', content: description }],
+      ['meta', { property: 'og:type', content: 'website' }],
+      ['meta', { property: 'og:locale', content: locale }],
+      ['meta', { property: 'og:site_name', content: 'VitePress' }],
+      ['meta', { property: 'og:image', content: ogImage }],
+      ['meta', { property: 'og:image:secure_url', content: ogImage }],
+      ['meta', { property: 'og:image:type', content: 'image/jpeg' }],
+      ['meta', { property: 'og:image:width', content: '1280' }],
+      ['meta', { property: 'og:image:height', content: '640' }],
+      ['meta', { property: 'og:image:alt', content: 'VitePress' }],
+      ['link', { rel: 'canonical', href: url }]
+    )
+  } : undefined
 })

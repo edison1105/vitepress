@@ -169,7 +169,7 @@ export async function renderPage(
     ${
       isDescriptionOverridden(head)
         ? ''
-        : `<meta name="description" content="${description}">`
+        : `<meta name="description" content="${escapeHtml(description)}">`
     }
     <meta name="generator" content="VitePress v${version}">
     ${stylesheetLink}
@@ -229,9 +229,9 @@ function resolvePageImports(
   ) as Rollup.OutputChunk
   return [
     ...appChunk.imports,
-    ...appChunk.dynamicImports,
-    ...pageChunk.imports,
-    ...pageChunk.dynamicImports
+    // ...appChunk.dynamicImports,
+    ...pageChunk.imports
+    // ...pageChunk.dynamicImports
   ]
 }
 
@@ -268,7 +268,7 @@ async function minifyScript(code: string, filename: string): Promise<string> {
   // @ts-ignore use oxc-minify when rolldown-vite is used
   if (vite.rolldownVersion) {
     const oxcMinify = await import('oxc-minify')
-    return oxcMinify.minify(filename, code).code.trim()
+    return (await oxcMinify.minify(filename, code)).code.trim()
   }
   return (
     await transformWithEsbuild(code, filename, { minify: false })

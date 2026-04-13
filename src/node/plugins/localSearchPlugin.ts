@@ -1,8 +1,7 @@
-import _debug from 'debug'
+import { createDebug } from 'obug'
 import fs from 'fs-extra'
 import MiniSearch from 'minisearch'
 import path from 'node:path'
-import pMap from 'p-map'
 import type { Plugin, ViteDevServer } from 'vite'
 import type { SiteConfig } from '../config'
 import type { DefaultTheme } from '../defaultTheme'
@@ -10,7 +9,7 @@ import { createMarkdownRenderer } from '../markdown/markdown'
 import { getLocaleForPath, slash, type MarkdownEnv } from '../shared'
 import { processIncludes } from '../utils/processIncludes'
 
-const debug = _debug('vitepress:local-search')
+const debug = createDebug('vitepress:local-search')
 
 const LOCAL_SEARCH_INDEX_ID = '@localSearchIndex'
 const LOCAL_SEARCH_INDEX_REQUEST_PATH = '/' + LOCAL_SEARCH_INDEX_ID
@@ -30,7 +29,7 @@ export async function localSearchPlugin(
       name: 'vitepress:local-search',
       resolveId(id) {
         if (id.startsWith(LOCAL_SEARCH_INDEX_ID)) {
-          return `/${id}`
+          return LOCAL_SEARCH_INDEX_REQUEST_PATH
         }
       },
       load(id) {
@@ -81,27 +80,27 @@ export async function localSearchPlugin(
   }
 
   let server: ViteDevServer | undefined
+  let pending: Promise<void>
 
   function onIndexUpdated() {
-    if (server) {
-      server.moduleGraph.onFileChange(LOCAL_SEARCH_INDEX_REQUEST_PATH)
-      // HMR
-      const mod = server.moduleGraph.getModuleById(
-        LOCAL_SEARCH_INDEX_REQUEST_PATH
-      )
-      if (!mod) return
-      server.ws.send({
-        type: 'update',
-        updates: [
-          {
-            acceptedPath: mod.url,
-            path: mod.url,
-            timestamp: Date.now(),
-            type: 'js-update'
-          }
-        ]
-      })
-    }
+    if (!server) return
+    server.moduleGraph.onFileChange(LOCAL_SEARCH_INDEX_REQUEST_PATH)
+    // HMR
+    const mod = server.moduleGraph.getModuleById(
+      LOCAL_SEARCH_INDEX_REQUEST_PATH
+    )
+    if (!mod) return
+    server.ws.send({
+      type: 'update',
+      updates: [
+        {
+          acceptedPath: mod.url,
+          path: mod.url,
+          timestamp: Date.now(),
+          type: 'js-update'
+        }
+      ]
+    })
   }
 
   function getDocId(file: string) {
@@ -142,9 +141,9 @@ export async function localSearchPlugin(
 
   async function scanForBuild() {
     debug('🔍️ Indexing files for search...')
-    await pMap(siteConfig.pages, indexFile, {
-      concurrency: siteConfig.buildConcurrency
-    })
+    for (const page of siteConfig.pages) {
+      await indexFile(page)
+    }
     debug('✅ Indexing finished...')
   }
 
@@ -161,10 +160,9 @@ export async function localSearchPlugin(
       }
     }),
 
-    async configureServer(_server) {
+    configureServer(_server) {
       server = _server
-      await scanForBuild()
-      onIndexUpdated()
+      pending = scanForBuild().then(onIndexUpdated)
     },
 
     resolveId(id) {
@@ -175,6 +173,7 @@ export async function localSearchPlugin(
 
     async load(id) {
       if (id === LOCAL_SEARCH_INDEX_REQUEST_PATH) {
+        await pending
         if (process.env.NODE_ENV === 'production') {
           await scanForBuild()
         }
@@ -183,11 +182,12 @@ export async function localSearchPlugin(
           records.push(
             `${JSON.stringify(
               locale
-            )}: () => import('@localSearchIndex${locale}')`
+            )}: () => import('${LOCAL_SEARCH_INDEX_ID}${locale}')`
           )
         }
         return `export default {${records.join(',')}}`
       } else if (id.startsWith(LOCAL_SEARCH_INDEX_REQUEST_PATH)) {
+        await pending
         return `export default ${JSON.stringify(
           JSON.stringify(
             indexByLocales.get(
@@ -211,7 +211,7 @@ export async function localSearchPlugin(
 }
 
 const headingRegex = /<h(\d*).*?>(.*?<a.*? href="#.*?".*?>.*?<\/a>)<\/h\1>/gi
-const headingContentRegex = /(.*?)<a.*? href="#(.*?)".*?>.*?<\/a>/i
+const headingContentRegex = /(.*)<a.*? href="#(.*?)".*?>.*?<\/a>/i
 
 /**
  * Splits HTML into sections based on headings

@@ -1,4 +1,5 @@
 ---
+description: VitePress는 마크다운에서 아름다운 문서 사이트를 만들 수 있는 Vite 및 Vue 기반 정적 사이트 생성기입니다.
 layout: home
 
 hero:
@@ -8,10 +9,10 @@ hero:
   actions:
     - theme: brand
       text: VitePress란 무엇인가?
-      link: /ko/guide/what-is-vitepress
+      link: ./guide/what-is-vitepress
     - theme: alt
       text: 빠른 시작
-      link: /ko/guide/getting-started
+      link: ./guide/getting-started
     - theme: alt
       text: GitHub
       link: https://github.com/vuejs/vitepress

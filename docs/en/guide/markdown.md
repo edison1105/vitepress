@@ -1,3 +1,7 @@
+---
+description: VitePress built-in Markdown extensions including custom containers, code blocks with syntax highlighting, line highlighting, code groups, and more.
+---
+
 # Markdown Extensions
 
 VitePress comes with built in Markdown Extensions.
@@ -277,11 +281,11 @@ Wraps in a `<div class="vp-raw">`
   }
   ```
 
-  It uses [`postcss-prefix-selector`](https://github.com/RadValentin/postcss-prefix-selector) under the hood. You can pass its options like this:
+  You can pass its options like this:
 
   ```js
   postcssIsolateStyles({
-    includeFiles: [/vp-doc\.css/] // defaults to /base\.css/
+    includeFiles: [/custom\.css/] // defaults to [/vp-doc\.css/, /base\.css/]
   })
   ```
 
@@ -365,7 +369,7 @@ export default {
 
 A [list of valid languages](https://shiki.style/languages) is available on Shiki's repository.
 
-You may also customize syntax highlight theme in app config. Please see [`markdown` options](../reference/site-config#markdown) for more details.
+You may also customize syntax highlight theme, configure language aliases, and set custom language labels in app config. Please see [`markdown` options](../reference/site-config#markdown) for more details.
 
 ## Line Highlighting in Code Blocks
 
@@ -781,7 +785,7 @@ You can also [import snippets](#import-code-snippets) in code groups:
 You can include a markdown file in another markdown file, even nested.
 
 ::: tip
-You can also prefix the markdown path with `@`, it will act as the source root. By default, it's the VitePress project root, unless `srcDir` is configured.
+You can also prefix the markdown path with `@`, and it will act as the source root. By default, the source root is the VitePress project root, unless `srcDir` is configured.
 :::
 
 For example, you can include a relative markdown file using this:
@@ -793,7 +797,7 @@ For example, you can include a relative markdown file using this:
 
 ## Basics
 
-<!--@include: ./parts/basics.md-->
+<!--@@include: ./parts/basics.md-->
 ```
 
 **Part file** (`parts/basics.md`)
@@ -829,7 +833,7 @@ It also supports selecting a line range:
 
 ## Basics
 
-<!--@include: ./parts/basics.md{3,}-->
+<!--@@include: ./parts/basics.md{3,}-->
 ```
 
 **Part file** (`parts/basics.md`)
@@ -865,8 +869,8 @@ You can also use a [VS Code region](https://code.visualstudio.com/docs/editor/co
 
 ## Basics
 
-<!--@include: ./parts/basics.md#basic-usage{,2}-->
-<!--@include: ./parts/basics.md#basic-usage{5,}-->
+<!--@@include: ./parts/basics.md#basic-usage{,2}-->
+<!--@@include: ./parts/basics.md#basic-usage{5,}-->
 ```
 
 **Part file** (`parts/basics.md`)
@@ -917,7 +921,7 @@ You can include the `My Base Section` section like this:
 
 ```md
 ## My Extended Section
-<!--@include: ./parts/basics.md#my-base-section-->
+<!--@@include: ./parts/basics.md#my-base-section-->
 ```
 
 **Equivalent code**
@@ -941,7 +945,7 @@ Here, `my-base-section` is the generated id of the heading element. In case it's
 and include it like this:
 
 ```md
-<!--@include: ./parts/basics.md#custom-id-->
+<!--@@include: ./parts/basics.md#custom-id-->
 ```
 
 ## Math Equations
@@ -949,7 +953,7 @@ and include it like this:
 This is currently opt-in. To enable it, you need to install `markdown-it-mathjax3` and set `markdown.math` to `true` in your config file:
 
 ```sh
-npm add -D markdown-it-mathjax3
+npm add -D markdown-it-mathjax3@^4
 ```
 
 ```ts [.vitepress/config.ts]

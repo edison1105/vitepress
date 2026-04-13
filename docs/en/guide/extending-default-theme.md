@@ -1,5 +1,6 @@
 ---
 outline: deep
+description: Customize and extend the VitePress default theme with custom CSS, components, layouts, and slots.
 ---
 
 # Extending the Default Theme
@@ -190,6 +191,7 @@ Full list of slots available in the default theme layout:
   - `home-hero-info-before`
   - `home-hero-info`
   - `home-hero-info-after`
+  - `home-hero-actions-before-actions`
   - `home-hero-actions-after`
   - `home-hero-image`
   - `home-hero-after`
@@ -252,6 +254,7 @@ provide('toggle-appearance', async ({ clientX: x, clientY: y }: MouseEvent) => {
     {
       duration: 300,
       easing: 'ease-in',
+      fill: 'forwards',
       pseudoElement: `::view-transition-${isDark.value ? 'old' : 'new'}(root)`
     }
   )
@@ -319,7 +322,7 @@ export default defineConfig({
         {
           find: /^.*\/VPNavBar\.vue$/,
           replacement: fileURLToPath(
-            new URL('./components/CustomNavBar.vue', import.meta.url)
+            new URL('./theme/components/CustomNavBar.vue', import.meta.url)
           )
         }
       ]

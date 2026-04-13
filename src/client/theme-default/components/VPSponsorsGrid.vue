@@ -1,4 +1,4 @@
-<script setup lang="ts" vapor>
+<script setup lang="ts">
 import type { GridSize } from '../composables/sponsor-grid'
 import { ref } from 'vue'
 import { useSponsorsGrid } from '../composables/sponsor-grid'
@@ -35,7 +35,6 @@ useSponsorsGrid({ el, size: props.size })
         rel="sponsored noopener"
       >
         <article class="vp-sponsor-grid-box">
-          <h4 class="visually-hidden">{{ sponsor.name }}</h4>
           <img
             class="vp-sponsor-grid-image"
             :src="sponsor.img"

@@ -28,6 +28,8 @@ export interface Router {
       initialLoad?: boolean
       // Whether to smoothly scroll to the target position.
       smoothScroll?: boolean
+      // Whether to replace the current history entry.
+      replace?: boolean
     }
   ) => Promise<void>
   /**
@@ -52,7 +54,7 @@ export interface Router {
 export const RouterSymbol: InjectionKey<Router> = Symbol()
 
 // we are just using URL to parse the pathname and hash - the base doesn't
-// matter and is only passed to support same-host hrefs.
+// matter and is only passed to support same-host hrefs
 const fakeHost = 'http://a.com'
 
 const getDefaultRoute = (): Route => ({
@@ -77,9 +79,21 @@ export function createRouter(
   const router: Router = {
     route,
     async go(href, options) {
+      const { hash } = new URL(href, fakeHost)
+      const hasTextFragment =
+        inBrowser && document.fragmentDirective && hash.includes(':~:')
       href = normalizeHref(href)
       if ((await router.onBeforeRouteChange?.(href)) === false) return
-      if (!inBrowser || (await changeRoute(href, options))) await loadPage(href)
+      if (
+        !inBrowser ||
+        (await changeRoute(href, { ...options, hasTextFragment }))
+      ) {
+        await loadPage(href, { initialLoad: !!options?.initialLoad })
+      }
+      if (hasTextFragment) {
+        // this will create a new history entry, but that's almost unavoidable
+        location.hash = hash
+      }
       syncRouteQueryAndHash()
       await router.onAfterRouteChange?.(href)
     }
@@ -87,7 +101,10 @@ export function createRouter(
 
   let latestPendingPath: string | null = null
 
-  async function loadPage(href: string, scrollPosition = 0, isRetry = false) {
+  async function loadPage(
+    href: string,
+    { scrollPosition = 0, isRetry = false, initialLoad = false } = {}
+  ) {
     if ((await router.onBeforePageLoad?.(href)) === false) return
 
     const targetLoc = new URL(href, fakeHost)
@@ -128,7 +145,7 @@ export function createRouter(
               history.replaceState({}, '', href)
             }
 
-            return scrollTo(targetLoc.hash, false, scrollPosition)
+            if (!initialLoad) scrollTo(targetLoc.hash, false, scrollPosition)
           })
         }
       }
@@ -147,7 +164,7 @@ export function createRouter(
         try {
           const res = await fetch(siteDataRef.value.base + 'hashmap.json')
           ;(window as any).__VP_HASH_MAP__ = await res.json()
-          await loadPage(href, scrollPosition, true)
+          await loadPage(href, { scrollPosition, isRetry: true, initialLoad })
           return
         } catch (e) {}
       }
@@ -157,10 +174,10 @@ export function createRouter(
         route.path = inBrowser ? pendingPath : withBase(pendingPath)
         route.component = fallbackComponent ? markRaw(fallbackComponent) : null
         const relativePath = inBrowser
-          ? pendingPath
+          ? route.path
               .replace(/(^|\/)$/, '$1index')
               .replace(/(\.html)?$/, '.md')
-              .replace(/^\//, '')
+              .slice(siteDataRef.value.base.length)
           : '404.md'
         route.data = { ...notFoundPageData, relativePath }
         syncRouteQueryAndHash(targetLoc)
@@ -227,7 +244,7 @@ export function createRouter(
     window.addEventListener('popstate', async (e) => {
       if (e.state === null) return
       const href = normalizeHref(location.href)
-      await loadPage(href, (e.state && e.state.scrollPosition) || 0)
+      await loadPage(href, { scrollPosition: e.state.scrollPosition || 0 })
       syncRouteQueryAndHash()
       await router.onAfterRouteChange?.(href)
     })
@@ -259,35 +276,57 @@ export function scrollTo(hash: string, smooth = false, scrollPosition = 0) {
     return
   }
 
-  let target: Element | null = null
-
+  let target: HTMLElement | null = null
   try {
     target = document.getElementById(decodeURIComponent(hash).slice(1))
   } catch (e) {
     console.warn(e)
   }
+  if (!target) return
 
-  if (target) {
-    const targetPadding = parseInt(
-      window.getComputedStyle(target).paddingTop,
-      10
-    )
-
-    const targetTop =
-      window.scrollY +
+  const targetTop =
+    window.scrollY +
       target.getBoundingClientRect().top -
       getScrollOffset() +
-      targetPadding
+      Number.parseInt(window.getComputedStyle(target).paddingTop, 10) || 0
 
-    function scrollToTarget() {
-      // only smooth scroll if distance is smaller than screen height.
-      if (!smooth || Math.abs(targetTop - window.scrollY) > window.innerHeight)
-        window.scrollTo(0, targetTop)
-      else window.scrollTo({ left: 0, top: targetTop, behavior: 'smooth' })
+  const behavior = window.matchMedia('(prefers-reduced-motion)').matches
+    ? 'instant'
+    : // only smooth scroll if distance is smaller than screen height
+      smooth && Math.abs(targetTop - window.scrollY) <= window.innerHeight
+      ? 'smooth'
+      : 'auto'
+
+  const scrollToTarget = () => {
+    window.scrollTo({ left: 0, top: targetTop, behavior })
+
+    // focus the target element for better accessibility
+    target.focus({ preventScroll: true })
+
+    // return if focus worked
+    if (document.activeElement === target) return
+
+    // element has tabindex already, likely not focusable
+    // because of some other reason, bail out
+    if (target.hasAttribute('tabindex')) return
+
+    const restoreTabindex = () => {
+      target.removeAttribute('tabindex')
+      target.removeEventListener('blur', restoreTabindex)
     }
 
-    requestAnimationFrame(scrollToTarget)
+    // temporarily make the target element focusable
+    target.setAttribute('tabindex', '-1')
+    target.addEventListener('blur', restoreTabindex)
+
+    // try to focus again
+    target.focus({ preventScroll: true })
+
+    // remove tabindex and event listener if focus still not worked
+    if (document.activeElement !== target) restoreTabindex()
   }
+
+  requestAnimationFrame(scrollToTarget)
 }
 
 function handleHMR(route: Route): void {
@@ -311,18 +350,23 @@ function shouldHotReload(payload: PageDataPayload): boolean {
 function normalizeHref(href: string): string {
   const url = new URL(href, fakeHost)
   url.pathname = url.pathname.replace(/(^|\/)index(\.html)?$/, '$1')
-  // ensure correct deep link so page refresh lands on correct files.
+  // ensure correct deep link so page refresh lands on correct files
   if (siteDataRef.value.cleanUrls) {
     url.pathname = url.pathname.replace(/\.html$/, '')
   } else if (!url.pathname.endsWith('/') && !url.pathname.endsWith('.html')) {
     url.pathname += '.html'
   }
-  return url.pathname + url.search + url.hash
+  return url.pathname + url.search + url.hash.split(':~:')[0]
 }
 
 async function changeRoute(
   href: string,
-  { smoothScroll = false, initialLoad = false } = {}
+  {
+    smoothScroll = false,
+    initialLoad = false,
+    replace = false,
+    hasTextFragment = false
+  } = {}
 ): Promise<boolean> {
   const loc = normalizeHref(location.href)
   const nextUrl = new URL(href, location.origin)
@@ -330,13 +374,17 @@ async function changeRoute(
 
   if (href === loc) {
     if (!initialLoad) {
-      scrollTo(nextUrl.hash, smoothScroll)
+      if (!hasTextFragment) scrollTo(nextUrl.hash, smoothScroll)
       return false
     }
   } else {
-    // save scroll position before changing URL
-    history.replaceState({ scrollPosition: window.scrollY }, '')
-    history.pushState({}, '', href)
+    if (replace) {
+      history.replaceState({}, '', href)
+    } else {
+      // save scroll position before changing URL
+      history.replaceState({ scrollPosition: window.scrollY }, '')
+      history.pushState({}, '', href)
+    }
 
     if (nextUrl.pathname === currentUrl.pathname) {
       // scroll between hash anchors on the same page, avoid duplicate entries
@@ -347,7 +395,7 @@ async function changeRoute(
             newURL: nextUrl.href
           })
         )
-        scrollTo(nextUrl.hash, smoothScroll)
+        if (!hasTextFragment) scrollTo(nextUrl.hash, smoothScroll)
       }
 
       return false

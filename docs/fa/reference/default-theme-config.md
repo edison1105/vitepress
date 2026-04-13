@@ -1,3 +1,7 @@
+---
+description: مرجع تمام گزینه‌های پیکربندی موجود برای تم پیش‌فرض ویت‌پرس.
+---
+
 # پیکربندی پیش‌فرض تم {#default-theme-config}
 
 پیکربندی تم به شما امکان می‌دهد تا تم خود را سفارشی کنید. شما می‌توانید پیکربندی تم را از طریق گزینه `themeConfig` در فایل پیکربندی تعریف کنید:
@@ -89,7 +93,7 @@ type NavItem = NavItemWithLink | NavItemWithChildren
 
 interface NavItemWithLink {
   text: string
-  link: string
+  link: string | ((payload: PageData) => string)
   activeMatch?: string
   target?: string
   rel?: string

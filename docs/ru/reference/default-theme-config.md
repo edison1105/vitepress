@@ -1,3 +1,7 @@
+---
+description: Справочник по всем параметрам конфигурации, доступным для темы VitePress по умолчанию.
+---
+
 # Настройка темы по умолчанию {#default-theme-config}
 
 Конфигурация темы позволяет настроить её под себя. Вы можете настроить тему с помощью опции `themeConfig` в файле конфигурации:
@@ -89,7 +93,7 @@ type NavItem = NavItemWithLink | NavItemWithChildren
 
 interface NavItemWithLink {
   text: string
-  link: string
+  link: string | ((payload: PageData) => string)
   activeMatch?: string
   target?: string
   rel?: string
